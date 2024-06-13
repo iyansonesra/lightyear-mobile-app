@@ -12,16 +12,30 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.iyansonesra.lyapplication"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.iyansonesra.lyapplication"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "scheme": "your-app-scheme",
+    "plugins": [
+      "expo-router"
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "ee191d7d-a7db-4c1d-92d3-6468fb4ae120"
+      }
     }
   }
 }
