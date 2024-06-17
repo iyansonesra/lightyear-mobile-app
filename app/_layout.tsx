@@ -24,6 +24,7 @@ const StackLayout = () => {
     return (
       <ThemeProvider>
         <Stack>
+          
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="EditProfile" options={{ headerShown: false }} />
           <Stack.Screen name="Settings" options={{ headerShown: false }} />
