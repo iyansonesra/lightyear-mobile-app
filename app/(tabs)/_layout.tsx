@@ -1,11 +1,13 @@
 import { View, Text } from 'react-native';
-import React from 'react';
+import React, { useContext } from 'react';
 import { Stack, Tabs } from 'expo-router';
 import * as Font from 'expo-font';
 import { useState } from 'react';
 import AppLoading from 'expo-app-loading';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
+import ThemeContext from '../../context/ThemeContext';
+import Colors from '../../components/Colors';
 
 
 const getFonts = () => Font.loadAsync({
@@ -22,90 +24,98 @@ const getFonts = () => Font.loadAsync({
 
 
 const TabLayout = () => {
+  const { theme, toggleTheme } = useContext(ThemeContext);
   const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  const handleToggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    toggleTheme(newTheme);
+  };
 
   if (fontsLoaded) {
     return (
-      <Tabs>
-         <Tabs.Screen name="Social" options={{
-          headerShown: false,
-          tabBarIcon: ({ color, focused }) => <Ionicons size={28} name='heart-outline' color={focused ? '#5271FF' : 'black'}/>,
-          tabBarShowLabel: false,
-          tabBarStyle: {
-            height: 90,
-            borderWidth: 0,
-            borderRadius: 50,
-            backgroundColor: 'white',
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.25,
-            shadowRadius: 3.84,
-            elevation: 5, // For Android
-          },
-          tabBarLabelStyle: {
-            fontFamily: 'Montserrat-Regular',
-            color: 'black',
-            fontSize: 12,
-            fontWeight: "bold",
-            marginBottom: 0,
-          },
-          tabBarIconStyle: {
-            marginTop: 15,
-          },
-        }} />
-        <Tabs.Screen name="Stats" options={{
-          headerShown: false,
-          tabBarIcon: ({ color, focused }) => <Ionicons size={28} name='stats-chart-outline' color={focused ? '#5271FF' : 'black'}/>,
-          tabBarShowLabel: false,
-          tabBarStyle: {
-            height: 90,
-            borderWidth: 0,
-            borderRadius: 50,
-            backgroundColor: 'white',
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.25,
-            shadowRadius: 3.84,
-            elevation: 5, // For Android
-          },
-          tabBarLabelStyle: {
-            fontFamily: 'Montserrat-Regular',
-            color: 'black',
-            fontSize: 12,
-            fontWeight: "bold",
-            marginBottom: 0,
-          },
-          tabBarIconStyle: {
-            marginTop: 15,
-          },
-        }} />
-         <Tabs.Screen name="Profile" options={{
-          headerShown: false,
-          tabBarIcon: ({ color, focused }) => <Ionicons size={28} name='person-outline' color={focused ? '#5271FF' : 'black'}/>,
-          tabBarShowLabel: false,
-          tabBarStyle: {
-            height: 90,
-            borderWidth: 0,
-            borderRadius: 50,
-            backgroundColor: 'white',
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.25,
-            shadowRadius: 3.84,
-            elevation: 5, // For Android
-          },
-          tabBarLabelStyle: {
-            fontFamily: 'Montserrat-Regular',
-            color: 'black',
-            fontSize: 12,
-            fontWeight: "bold",
-            marginBottom: 0,
-          },
-          tabBarIconStyle: {
-            marginTop: 15,
-          },
-        }} />
-      </Tabs>
+      <View style={{ flex: 1, backgroundColor: theme === 'light' ? Colors.light.backgroundColor : Colors.dark.backgroundColor }}>
+
+        <Tabs>
+          <Tabs.Screen name="Social" options={{
+            headerShown: false,
+            tabBarIcon: ({ color, focused }) => <Ionicons size={28} name='heart-outline' color={focused ? '#5271FF' : theme == 'light' ? 'black' : 'white'} />,
+            tabBarShowLabel: false,
+            tabBarStyle: {
+              height: 90,
+              borderWidth: 0,
+              borderRadius: 50,
+              backgroundColor: theme == 'light' ? Colors.light.backgroundColor : Colors.dark.backgroundColor,
+              shadowColor: theme == 'light' ? Colors.light.textColor : Colors.dark.textColor,
+              borderTopColor: "transparent",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.25,
+              shadowRadius: 5,
+              // elevation: 5, // For Android
+            },
+            tabBarLabelStyle: {
+              fontFamily: 'Montserrat-Regular',
+              color: 'black',
+              fontSize: 12,
+              fontWeight: "bold",
+              marginBottom: 0,
+            },
+            tabBarIconStyle: {
+              marginTop: 15,
+            },
+          }} />
+          <Tabs.Screen name="Stats" options={{
+            headerShown: false,
+            tabBarIcon: ({ color, focused }) => <Ionicons size={28} name='stats-chart-outline' color={focused ? '#5271FF' : theme == 'light' ? 'black' : 'white'} />,
+            tabBarShowLabel: false,
+            tabBarStyle: {
+              height: 90,
+              borderWidth: 0,
+              borderRadius: 50,
+              backgroundColor: theme == 'light' ? Colors.light.backgroundColor : Colors.dark.backgroundColor,
+              shadowColor: theme == 'light' ? Colors.light.textColor : Colors.dark.textColor,
+              borderTopColor: "transparent",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.25,
+              shadowRadius: 5,
+              // elevation: 5, // For Android
+            },
+            tabBarLabelStyle: {
+              fontFamily: 'Montserrat-Regular',
+              color: 'black',
+              fontSize: 12,
+              fontWeight: "bold",
+              marginBottom: 0,
+            },
+            tabBarIconStyle: {
+              marginTop: 15,
+            },
+          }} />
+          <Tabs.Screen name="Profile" options={{
+            headerShown: false,
+            tabBarIcon: ({ color, focused }) => <Ionicons size={28} name='person-outline' color={focused ? '#5271FF' : theme == 'light' ? 'black' : 'white'} />,
+            tabBarShowLabel: false,
+            tabBarStyle: {
+              height: 90,
+              borderWidth: 0,
+              borderRadius: 50,
+              backgroundColor: theme == 'light' ? Colors.light.backgroundColor : Colors.dark.backgroundColor,
+              shadowColor: theme == 'light' ? Colors.light.textColor : Colors.dark.textColor,
+              borderTopColor: "transparent",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.25,
+              shadowRadius: 5,
+              // elevation: 5, // For Android
+            },
+            tabBarLabelStyle: {
+           
+            },
+            tabBarIconStyle: {
+              marginTop: 15,
+            },
+          }} />
+        </Tabs>
+        </View>
     );
   } else {
     return (
