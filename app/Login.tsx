@@ -1,13 +1,61 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Link } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
-import { View, StyleSheet, Text, useWindowDimensions, Image, TextInput, Button, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform, Animated } from 'react-native';
+import { View, StyleSheet, Text, useWindowDimensions, Image, TextInput, Button, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform, Animated, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { FIREBASE_AUTH } from '../FirebaseConfig.js';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { getDatabase, ref, set } from "firebase/database";
+import { useRouter } from 'expo-router';
+import { useAuth } from '../context/AuthContext.js';
+
+const database = getDatabase();
+
 
 const Login = ({ }) => {
     const [hidePassword, setHidePassword] = useState(true);
     const windowWidth = useWindowDimensions().width;
     const windowHeight = useWindowDimensions().height;
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+    const auth = FIREBASE_AUTH;
+
+    const router = useRouter();
+    const emailRef = useRef("");
+    const passwordRef = useRef("");
+    const {login} = useAuth();
+
+    const handleLogin = async () => {
+        if(!emailRef.current || !passwordRef.current) {
+            Alert.alert('Please fill all fields');
+            return;
+        }
+
+        const response = await login(emailRef.current, passwordRef.current);
+        console.log('sing in response: ', response);
+        if(!response.success) {
+            Alert.alert("Sign In Failed", response.msg);
+            return;
+        }
+        
+    }
+
+    const signIn = async () => {
+
+        try {
+            const user = await signInWithEmailAndPassword(auth, email, password)
+            console.log(user);
+            alert('Check console for user data');
+        } catch (error) {
+            console.log(error);
+            alert('Sign In Failed');
+        } finally {
+
+        }
+    }
+
+   
 
     const Colors = {
         primary: '#030303',
@@ -35,11 +83,11 @@ const Login = ({ }) => {
 
                     <View style={styles.inputSection}>
                         <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 14, color: 'white' }}>Email</Text>
-                        <TextInput style={styles.input} placeholder='janedoe@gmail.com' placeholderTextColor="#9CA3AF" />
+                        <TextInput style={styles.input} placeholder='Email' onChangeText={value=>emailRef.current=value} placeholderTextColor="#9CA3AF" />
                         <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 14, color: 'white' }}>Password</Text>
-                        <TextInput style={styles.input} placeholder='* * * * * * * * * * * *' placeholderTextColor="#9CA3AF" secureTextEntry={true} />
+                        <TextInput style={styles.input} placeholder='Password' onChangeText={value=>passwordRef.current=value} placeholderTextColor="#9CA3AF" secureTextEntry={true} />
 
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={handleLogin}>
                             <LinearGradient
                                 style={styles.buttonLogin}
                                 colors={["#004AAD", "#5271FF"]}
@@ -52,7 +100,7 @@ const Login = ({ }) => {
                             </LinearGradient>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={styles.googleLogin}>
+                        <TouchableOpacity style={styles.googleLogin} >
                             <Image style={styles.googleLogo} source={require('./../assets/google.png')} />
                             <Text style={styles.googleSignInText}>Sign in with Google</Text>
                         </TouchableOpacity>

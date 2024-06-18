@@ -1,45 +1,37 @@
-import { View, Text } from 'react-native';
-import React from 'react';
-import { Stack, Tabs } from 'expo-router';
-import * as Font from 'expo-font';
-import { useState } from 'react';
-import AppLoading from 'expo-app-loading';
-import { ThemeProvider } from './../context/ThemeContext.js';
+import { View, Text, ActivityIndicator } from 'react-native';
+import React, { useEffect } from 'react';
+import { Slot, useSegments, useRouter } from "expo-router";
+import { AuthContextProvider, useAuth } from '../context/AuthContext'
 
-const getFonts = () => Font.loadAsync({
-  'Montserrat-Bold': require('./../assets/fonts/Montserrat-Bold.ttf'),
-  'Montserrat-Thin': require('./../assets/fonts/Montserrat-Thin.ttf'),
-  'Montserrat-ExtraBold': require('./../assets/fonts/Montserrat-ExtraBold.ttf'),
-  'Montserrat-SemiBoldItalic': require('./../assets/fonts/Montserrat-SemiBoldItalic.ttf'),
-  'Montserrat-SemiBold': require('./../assets/fonts/Montserrat-SemiBold.ttf'),
-  'Montserrat-Light': require('./../assets/fonts/Montserrat-Light.ttf'),
-  'Montserrat-Regular': require('./../assets/fonts/Montserrat-Regular.ttf'),
-  'Montserrat-Italic': require('./../assets/fonts/Montserrat-Italic.ttf'),
+const MainLayout = () => {
+  const { isAuthenticated, isLoading } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
 
-});
-const StackLayout = () => {
-  const [fontsLoaded, setFontsLoaded] = useState(false);
+  useEffect(() => {
 
-  if (fontsLoaded) {
-    return (
-      <ThemeProvider>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="EditProfile" options={{ headerShown: false }} />
-          <Stack.Screen name="Settings" options={{ headerShown: false }} />
-          <Stack.Screen name="Logout" options={{ headerShown: false }} />
-        </Stack>
-      </ThemeProvider>
-    );
-  } else {
-    return (
-      <AppLoading
-        startAsync={getFonts}
-        onFinish={() => setFontsLoaded(true)}
-        onError={(err) => console.log(err)}
-      />
-    )
-  }
+    if(typeof isAuthenticated == 'undefined') return;
+    const inApp = segments[0] == '(tabs)';
+
+    if(isAuthenticated && !inApp) {
+      router.replace('Social');
+      //redirect user to home
+    } else if(!isAuthenticated) {
+      router.replace('Login');
+    }
+      //redirect to sign in
+  }, [isAuthenticated])
+
+  return <Slot />
 }
 
-export default StackLayout;
+export default function RootLayout() {
+  return (
+    <AuthContextProvider>
+      <MainLayout />
+    </AuthContextProvider>
+
+
+
+  )
+}

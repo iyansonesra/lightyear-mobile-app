@@ -4,7 +4,7 @@ import * as Font from 'expo-font';
 import { useState } from 'react';
 import AppLoading from 'expo-app-loading';
 
-import Login from './app/Login';
+import Login from './app/(tabs)/Login';
 import SignUp from './app/SignUp';
 
 const getFonts = () => Font.loadAsync({
