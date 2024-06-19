@@ -3,7 +3,6 @@ import { Link } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { View, StyleSheet, Text, useWindowDimensions, Image, TextInput, Button, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform, Animated, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { FIREBASE_AUTH } from '../FirebaseConfig.js';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { getDatabase, ref, set } from "firebase/database";
@@ -19,7 +18,6 @@ const Login = ({ }) => {
     const windowHeight = useWindowDimensions().height;
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-    const auth = FIREBASE_AUTH;
 
     const router = useRouter();
     const emailRef = useRef("");
@@ -39,20 +37,6 @@ const Login = ({ }) => {
             return;
         }
         
-    }
-
-    const signIn = async () => {
-
-        try {
-            const user = await signInWithEmailAndPassword(auth, email, password)
-            console.log(user);
-            alert('Check console for user data');
-        } catch (error) {
-            console.log(error);
-            alert('Sign In Failed');
-        } finally {
-
-        }
     }
 
    
@@ -76,7 +60,7 @@ const Login = ({ }) => {
             end={{ x: 1, y: 1 }}
         >
             <SafeAreaView style={{ flex: 1, width: "100%", alignItems: "center", marginTop: 100 }}>
-                <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : null} style={{ flex: 1, width: "100%", alignItems: "center", }}>
+                <KeyboardAvoidingView behavior="padding" style={{ flex: 1, width: "100%", alignItems: "center", }}>
                     <Image style={styles.logo} source={require('./../assets/lightyear-logo.png')} />
                     <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 45, color: 'white' }}>Login</Text>
                     <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 20, color: 'white' }}>Sign in to continue</Text>

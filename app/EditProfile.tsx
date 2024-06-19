@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import ThemeContext from '../context/ThemeContext';
 import Colors from '../components/Colors';
+import { router } from 'expo-router';
 
 
 
@@ -15,9 +16,9 @@ const Settings = ({ }) => {
     const handleToggleTheme = () => {
         const newTheme = theme === 'light' ? 'dark' : 'light';
         toggleTheme(newTheme);
-      };
+    };
 
-      const styles = StyleSheet.create({
+    const styles = StyleSheet.create({
         container: {
             flex: 1,
             backgroundColor: theme == 'light' ? Colors.light.backgroundColor : Colors.dark.backgroundColor,
@@ -26,7 +27,7 @@ const Settings = ({ }) => {
         },
         innner: {
             flex: 1,
-    
+
         },
         logo: {
             width: 150,
@@ -34,7 +35,7 @@ const Settings = ({ }) => {
             marginTop: "5%",
             marginBottom: "2.5%",
             borderRadius: 60,
-    
+
         },
         topProf: {
             height: "30%",
@@ -42,7 +43,7 @@ const Settings = ({ }) => {
         },
         vertText: {
             flexDirection: "column",
-    
+
         },
         goBack: {
             height: "7%",
@@ -62,24 +63,26 @@ const Settings = ({ }) => {
             padding: 20,
             fontFamily: 'Montserrat-Regular',
             fontSize: 18,
-    
+
         },
-          divider: {
+        divider: {
             height: .5,
             width: "90%",
             backgroundColor: theme == 'light' ? Colors.light.textColor : Colors.dark.textColor,
             alignSelf: "center",
         },
-    
+
     });
-    
+
 
     const keyboardVerticalOffset = Platform.OS === 'ios' ? 200 : 0
     return (
         <KeyboardAvoidingView behavior='padding' keyboardVerticalOffset={keyboardVerticalOffset} style={styles.container}>
             <SafeAreaView style={styles.innner} >
                 <View style={styles.goBack}>
-                    <Ionicons name="arrow-back-outline" size={30} color={theme == 'light' ? Colors.light.textColor : Colors.dark.textColor} />
+                    <Pressable onPress={() => router.back()}>
+                        <Ionicons name="arrow-back-outline" size={30} color={theme == 'light' ? Colors.light.textColor : Colors.dark.textColor} />
+                    </Pressable>
                     <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 30, color: theme == 'light' ? Colors.light.textColor : Colors.dark.textColor, marginLeft: "5%", }}>Edit Profile</Text>
                 </View>
                 <View style={styles.topProf}>
@@ -88,13 +91,13 @@ const Settings = ({ }) => {
                 </View>
                 <View style={styles.divider}></View>
 
-                <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 17, color: theme == 'light' ? Colors.light.textColor : Colors.dark.textColor, marginLeft: "7%", marginBottom: "2%"}}>First Name</Text>
-                <TextInput style={styles.input} placeholder='Iyan' placeholderTextColor="#9CA3AF"/>
+                <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 17, color: theme == 'light' ? Colors.light.textColor : Colors.dark.textColor, marginLeft: "7%", marginBottom: "2%" }}>First Name</Text>
+                <TextInput style={styles.input} placeholder='Iyan' placeholderTextColor="#9CA3AF" />
 
-                <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 17, color: theme == 'light' ? Colors.light.textColor : Colors.dark.textColor, marginLeft: "7%", marginBottom: "2%"}}>Last Name</Text>
+                <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 17, color: theme == 'light' ? Colors.light.textColor : Colors.dark.textColor, marginLeft: "7%", marginBottom: "2%" }}>Last Name</Text>
                 <TextInput style={styles.input} placeholder='Sonesra' placeholderTextColor="#9CA3AF" />
 
-                <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 17, color: theme == 'light' ? Colors.light.textColor : Colors.dark.textColor, marginLeft: "7%", marginBottom: "2%"}}>Bio</Text>
+                <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 17, color: theme == 'light' ? Colors.light.textColor : Colors.dark.textColor, marginLeft: "7%", marginBottom: "2%" }}>Bio</Text>
                 <TextInput style={styles.input} placeholder='ut 27' placeholderTextColor="#9CA3AF" />
 
 

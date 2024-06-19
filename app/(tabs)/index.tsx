@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, ReactNode } from 'react';
 import { Link } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { View, StyleSheet, Text, useWindowDimensions, Image, TextInput, Button, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform, FlatList, ScrollView } from 'react-native';
@@ -228,19 +228,19 @@ const Stats = ({ }) => {
                 <SelectList
                     inputStyles={{  color: theme == 'light' ? Colors.light.textColor : Colors.dark.textColor, fontFamily: 'Montserrat-Regular', marginLeft: "2%"}}
                     dropdownTextStyles={{  color: theme == 'light' ? Colors.light.textColor : Colors.dark.textColor, fontFamily: 'Montserrat-Regular'}}
-                    dropdownItemStyles={{ color: theme == 'light' ? Colors.light.textColor : Colors.dark.textColor, justifyContent: 'center', alignItems: 'center',}}
-                    dropdownStyles = {{backgroundColor: theme == 'light' ? Colors.light.backgroundColor : Colors.dark.backgroundColor}}
-                    boxStyles={{borderWidth: '0', backgroundColor: 'transparent', borderColor:theme == 'light' ? Colors.light.textColor : Colors.dark.textColor, borderTopWidth: 1, borderLeftWidth: 1, borderRightWidth: 1, borderBottomWidth: 1, borderRadius: 50}}
+                    dropdownItemStyles={{ justifyContent: 'center', alignItems: 'center' }}
+                    dropdownStyles={{ backgroundColor: theme == 'light' ? Colors.light.backgroundColor : Colors.dark.backgroundColor }}
+                    boxStyles={{ borderWidth: 0, backgroundColor: 'transparent', borderColor: theme == 'light' ? Colors.light.textColor : Colors.dark.textColor, borderTopWidth: 1, borderLeftWidth: 1, borderRightWidth: 1, borderBottomWidth: 1, borderRadius: 50 }}
                     arrowicon={<Ionicons name="chevron-down-outline" size={15} color={theme == 'light' ? Colors.light.textColor : Colors.dark.textColor} />}
                     search={false}
-                    setSelected={(val) => setSelected(val)}
+                    setSelected={(val: React.SetStateAction<string>) => setSelected(val)}
                     data={workoutSelections}
                     save="value"
                     maxHeight={150}
                     dropdownShown={false}
                 />
 
-                <View style={{ position: "absolute", top: 60, zIndex: -10, width: "100%", marginTop: "17%", alignSelf: 'center', color: theme == 'light' ? Colors.light.textColor : Colors.dark.textColor, borderRadius: 70 }}>
+                <View style={{ position: "absolute", top: 60, zIndex: -10, width: "100%", marginTop: "17%", alignSelf: 'center', borderRadius: 70 }}>
                     <LineChart
                         areaChart
                         curved
@@ -251,7 +251,8 @@ const Stats = ({ }) => {
                         disableScroll
                         hideDataPoints
                         spacing={10}
-                        hideXAxisLabel={false}
+                        // Remove the 'hideXAxisLabel' property
+                        // hideXAxisLabel={false}
                         showXAxisIndices={false}
                         xAxisLabelsHeight={0}
                         color="#5197B6"
@@ -269,7 +270,6 @@ const Stats = ({ }) => {
                         rulesColor="gray"
                         xAxisLabelTextStyle={{ color: "black" }}
                         yAxisTextStyle={{ color: 'gray' }}
-                        yAxisSide='right'
                         pointerConfig={{
                             pointerStripHeight: 160,
                             showPointerStrip: false,
@@ -282,7 +282,9 @@ const Stats = ({ }) => {
                             pointerLabelHeight: 90,
                             activatePointersOnLongPress: true,
                             autoAdjustPointerLabelPosition: false,
-                            pointerLabelComponent: items => {
+                            pointerLabelComponent: (items: {
+                                date: ReactNode; value: string; 
+}[]) => {
                                 return (
                                     <View
                                         style={{

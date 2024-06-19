@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import ThemeContext from '../context/ThemeContext';
 import Colors from '../components/Colors';
+import { router } from 'expo-router';
 
 
 const Settings = ({ }) => {
@@ -106,7 +107,9 @@ const Settings = ({ }) => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.goBack}>
-                <Ionicons name="arrow-back-outline" size={30} color={theme == 'light' ? Colors.light.textColor : Colors.dark.textColor} />
+                <Pressable onPress ={() => router.back()}>
+                    <Ionicons name="arrow-back-outline" size={30} color={theme == 'light' ? Colors.light.textColor : Colors.dark.textColor} />
+                </Pressable>
                 <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 30, color: theme == 'light' ? Colors.light.textColor : Colors.dark.textColor, marginLeft: "5%", }}>Settings</Text>
             </View>
             <View style={styles.divider}></View>
@@ -122,7 +125,7 @@ const Settings = ({ }) => {
                         borderRadius: 50,
                         backgroundColor: theme === 'light' ? '#fff' : '#000',
                         borderColor: theme === 'dark' ? '#fff' : '#000',
-    
+
                         marginRight: '8%'
                     }}>
                     <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 19, color: theme == 'light' ? Colors.light.textColor : Colors.dark.textColor, }}>
