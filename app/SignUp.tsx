@@ -35,8 +35,6 @@ export default function SignUp() {
             return;
         }
 
-        // setLoading(true);
-
         let response = await register(emailRef.current, passwordRef.current, firstNameRef.current, lastNameRef.current);
 
         console.log('got result', response);

@@ -33,14 +33,11 @@ const Login = ({ }) => {
         const response = await login(emailRef.current, passwordRef.current);
         console.log('sing in response: ', response);
         if(!response.success) {
-            Alert.alert("Sign In Failed", response.msg);
+            // Alert.alert("Sign In Failed", response.msg);
             return;
         }
         
     }
-
-   
-
     const Colors = {
         primary: '#030303',
         secondary: '#E5E7EB',
@@ -59,24 +56,25 @@ const Login = ({ }) => {
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
         >
+            <Image  source={require('./../assets/new-background.jpg')}  style = {{position: "absolute", }}/>
             <SafeAreaView style={{ flex: 1, width: "100%", alignItems: "center", marginTop: 100 }}>
                 <KeyboardAvoidingView behavior="padding" style={{ flex: 1, width: "100%", alignItems: "center", }}>
-                    <Image style={styles.logo} source={require('./../assets/lightyear-logo.png')} />
-                    <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 45, color: 'white' }}>Login</Text>
-                    <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 20, color: 'white' }}>Sign in to continue</Text>
+                    <Image style={styles.logo} source={require('./../assets/lightyear-black-logo.png')} />
+                    <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 45, color: 'black' }}>Login</Text>
+                    <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 20, color: 'black' }}>Sign in to continue</Text>
 
                     <View style={styles.inputSection}>
-                        <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 14, color: 'white' }}>Email</Text>
+                        <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 14, color: 'black' }}>Email</Text>
                         <TextInput style={styles.input} placeholder='Email' onChangeText={value=>emailRef.current=value} placeholderTextColor="#9CA3AF" />
-                        <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 14, color: 'white' }}>Password</Text>
+                        <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 14, color: 'black' }}>Password</Text>
                         <TextInput style={styles.input} placeholder='Password' onChangeText={value=>passwordRef.current=value} placeholderTextColor="#9CA3AF" secureTextEntry={true} />
 
                         <TouchableOpacity onPress={handleLogin}>
                             <LinearGradient
                                 style={styles.buttonLogin}
-                                colors={["#004AAD", "#5271FF"]}
-                                start={{ x: 1, y: 0 }}
-                                end={{ x: 1, y: 1 }}
+                                colors={["#fff", "#000"]}
+                                start={{ x: 2, y: 0 }}
+                                end={{ x: 0, y: 1 }}
                             >
 
                                 <Text style={styles.signInText}>Sign In</Text>
@@ -84,17 +82,17 @@ const Login = ({ }) => {
                             </LinearGradient>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={styles.googleLogin} >
+                        {/* <TouchableOpacity style={styles.googleLogin} >
                             <Image style={styles.googleLogo} source={require('./../assets/google.png')} />
                             <Text style={styles.googleSignInText}>Sign in with Google</Text>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
                     </View>
 
 
                     <View style={styles.bottomTextContainer}>
                         {/*ADD TEXT ON PRESS NAVIGATION*/}
 
-                        <Text style={{ fontFamily: "Montserrat-Italic", color: "white", }}>Don't have an account? <Link to="/SignUp"><Text style={{ fontFamily: "Montserrat-Bold" }}>| Sign Up</Text></Link></Text>
+                        <Text style={{ fontFamily: "Montserrat-Italic", color: "black", }}>Don't have an account? <Link to="/SignUp"><Text style={{ fontFamily: "Montserrat-Bold" }}>| Sign Up</Text></Link></Text>
 
                     </View>
                 </KeyboardAvoidingView>
@@ -127,6 +125,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignContent: 'center',
         color: 'white',
+        backgroundColor: "transparent",
         fontFamily: 'Montserrat-SemiBold',
         marginBottom: 15,
         shadowColor: '#000',
@@ -158,16 +157,17 @@ const styles = StyleSheet.create({
         marginTop: 6,
         marginBottom: 18,
         borderWidth: 0.5,
-        borderColor: 'white',
+        borderColor: 'black',
         borderRadius: 10,
         padding: 10,
-        color: 'white',
+        color: 'black',
         fontFamily: 'Montserrat-Regular',
     },
     container: {
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
+      
     },
     logo: {
         width: 100,

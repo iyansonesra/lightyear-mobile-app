@@ -1,10 +1,11 @@
 import { View, Text, ActivityIndicator } from 'react-native';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Slot, useSegments, useRouter } from "expo-router";
 import * as Font from 'expo-font';
 import { AuthContextProvider, useAuth } from '../context/AuthContext.js'
 import ThemeContext from '../context/ThemeContext.js';
 import { ThemeProvider } from '../context/ThemeContext.js';
+import LoadingOverlay from '../components/LoadingOverlay';
 
 
 const getFonts = () => Font.loadAsync({
@@ -20,26 +21,46 @@ const getFonts = () => Font.loadAsync({
 });
 
 const MainLayout = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, emailVerified, user } = useAuth();
   const segments = useSegments();
   const router = useRouter();
-  const { theme, toggleTheme } = useContext(ThemeContext);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   useEffect(() => {
-    if (typeof isAuthenticated == 'undefined') return;
-    const inApp = segments[0] == '(tabs)';
+    if (isLoading) return;
 
-    if (isAuthenticated && !inApp) {
-      router.push('(tabs)');
-      //redirect user to home
-    } else if (!isAuthenticated) {
-      router.push('Login');
+    const inApp = segments[0] === '(tabs)';
+    const inAuth = segments[0] === '(auth)';
+    const inEmailVerification = segments[0] === 'EmailVerification';
+
+    const navigate = async (route) => {
+      setIsNavigating(true);
+      await router.replace(route);
+      setTimeout(() => setIsNavigating(false), 500); // Delay to ensure the overlay is visible
+    };
+
+    if (isAuthenticated && user) {
+      if (!emailVerified && !inEmailVerification) {
+        navigate('/EmailVerification');
+      } else if (emailVerified && !inApp) {
+        navigate('/(tabs)');
+      }
+    } else if (!isAuthenticated && !inAuth && !inEmailVerification) {
+      navigate('/SignUp');
     }
-    //redirect to sign in
-  }, [isAuthenticated])
+  }, [isAuthenticated, emailVerified, user, isLoading, segments]);
 
-  return <Slot />;
-}
+  if (isLoading) {
+    return <LoadingOverlay />;
+  }
+
+  return (
+    <View style={{ flex: 1 }}>
+      <Slot />
+      {isNavigating && <LoadingOverlay />}
+    </View>
+  );
+};
 
 export default function RootLayout() {
   return (
@@ -48,8 +69,5 @@ export default function RootLayout() {
         <MainLayout />
       </ThemeProvider>
     </AuthContextProvider>
-
-
-
-  )
+  );
 }

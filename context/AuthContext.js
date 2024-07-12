@@ -1,7 +1,11 @@
-import { onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import {  onAuthStateChanged, 
+    createUserWithEmailAndPassword, 
+    signInWithEmailAndPassword, 
+    signOut,
+    sendEmailVerification } from "firebase/auth";
 import { createContext, useState, useEffect, useContext } from "react";
 import {auth, db} from "../FirebaseConfig";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { collection,query, doc, where, getDoc, setDoc, getDocs  } from "firebase/firestore";
 
 
 export const AuthContext = createContext();
@@ -9,26 +13,63 @@ export const AuthContext = createContext();
 export const AuthContextProvider = ({children}) => {
     const [user, setUser] = useState(null);
     const [isAuthenticated, setIsAuthenticated] = useState(undefined);
+    const [emailVerified, setEmailVerified] = useState(false);
+
+    const generatePIN = () => {
+        return Math.floor(10000000 + Math.random() * 90000000).toString();
+    };
+
+    // Check if the PIN already exists in the database
+    const isPINUnique = async (pin) => {
+        const usersRef = collection(db, "users");
+        const q = query(usersRef, where("PIN", "==", pin));
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.empty;
+    };
+
+    // Generate a unique PIN
+    const generateUniquePIN = async () => {
+        let pin;
+        do {
+            pin = generatePIN();
+        } while (!(await isPINUnique(pin)));
+        return pin;
+    };
 
 
-    useEffect(() =>{    
-        const unsub = onAuthStateChanged(auth, (user)=> {
-            if(user) {
-                setIsAuthenticated(true);
-                setUser(user);
-            } else {
-                setIsAuthenticated(false);
-                setUser(null);
+
+    useEffect(() => {
+        const unsub = onAuthStateChanged(auth, async (user) => {
+          if (user) {
+            setIsAuthenticated(true);
+            setUser(user);
+            setEmailVerified(user.emailVerified);
+      
+            // Check if email is verified on each auth state change
+            if (user.emailVerified) {
+              const userDoc = await getDoc(doc(db, "users", user.uid));
+              if (userDoc.exists() && !userDoc.data().emailVerified) {
+                await setDoc(doc(db, "users", user.uid), { emailVerified: true }, { merge: true });
+              }
             }
-        })
-
+          } else {
+            setIsAuthenticated(false);
+            setUser(null);
+            setEmailVerified(false);
+          }
+        });
+      
         return unsub;
-        
-    },[])
+      }, []);
 
     const login = async (email, password) => {
         try{
             const response = await signInWithEmailAndPassword(auth, email, password);
+            setIsAuthenticated(true);
+            setEmailVerified(user.emailVerified);
+           console.log(user.emailVerified);
+            setUser(user);
+
             return {success: true};
         } catch(e){
            let msg = e.message;
@@ -51,18 +92,24 @@ export const AuthContextProvider = ({children}) => {
     }
 
     const register = async (email, password,firstName,lastName) => {
-        try{
+        try {
             const response = await createUserWithEmailAndPassword(auth, email, password);
             console.log(response?.user);
 
-            // setUser(responser?.user);
-            // setIsAuthenticated(true);
+            const uniquePIN = await generateUniquePIN();
 
+        
             await setDoc(doc(db, "users", response?.user?.uid), {
-                firstName,
-                lastName,
-                userId: response?.user?.uid
+              firstName,
+              lastName,
+              userId: response?.user?.uid,
+              emailVerified: false,
+              PIN: uniquePIN
             });
+        
+            // Send email verification
+            await sendEmailVerification(response.user);
+        
             return {success: true, data: response?.user};
         } catch(e){
           let msg = e.message;
@@ -79,7 +126,7 @@ export const AuthContextProvider = ({children}) => {
     }
 
     return (
-        <AuthContext.Provider value = {{user, isAuthenticated, login, register, logout}}>
+        <AuthContext.Provider value = {{user, isAuthenticated, emailVerified, login, register, logout}}>
             {children}
         </AuthContext.Provider>
     )
