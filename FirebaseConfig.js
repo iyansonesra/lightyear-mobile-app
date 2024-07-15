@@ -7,6 +7,9 @@ import { getAuth } from "firebase/auth";
 import { getFirestore , collection} from "firebase/firestore";
 import {getReactNativePersistence, initializeAuth} from 'firebase/auth/react-native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getStorage } from "firebase/storage";
+
+
 
 
 // Import the functions you need from the SDKs you need
@@ -45,4 +48,6 @@ export {app, auth};
 export const db = getFirestore(app);
 
 export const usersRef = collection(db, 'users');
+export const storage = getStorage(app);
+
 export const roomRef = collection(db, 'rooms');

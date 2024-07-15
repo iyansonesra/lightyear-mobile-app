@@ -6,7 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { getDatabase, ref, set } from "firebase/database";
-import {getFirestore, collection, getDocs} from 'firebase/firestore';
+import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'expo-router';
 
@@ -20,17 +20,18 @@ export default function SignUp() {
     const windowWidth = useWindowDimensions().width;
     const windowHeight = useWindowDimensions().height;
     const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
+    const [password, setPassword] = useState('');
+    const router = useRouter();
 
     const emailRef = useRef("");
     const passwordRef = useRef("");
     const firstNameRef = useRef("");
     const lastNameRef = useRef("");
-    const {register} = useAuth();
-    const router = useRouter();
+    const { register } = useAuth();
+
 
     const handleRegister = async () => {
-        if(!emailRef.current || !passwordRef.current || !firstNameRef.current || !lastNameRef.current) {
+        if (!emailRef.current || !passwordRef.current || !firstNameRef.current || !lastNameRef.current) {
             Alert.alert('sign up', 'please fill all the fields!');
             return;
         }
@@ -38,10 +39,14 @@ export default function SignUp() {
         let response = await register(emailRef.current, passwordRef.current, firstNameRef.current, lastNameRef.current);
 
         console.log('got result', response);
-        if(!response.success) {
+        if (!response.success) {
             Alert.alert('sign up did not work', response.msg)
         }
     }
+
+    const handleLogin = () => {
+        router.replace('/Login');
+    };
 
     const Colors = {
         primary: '#030303',
@@ -55,35 +60,33 @@ export default function SignUp() {
     };
 
     return (
-        <LinearGradient
+        <View
             style={styles.container}
-            colors={["#000000", "#103565", "#5687A2"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
         >
+             <Image  source={require('./../assets/new-background.jpg')}  style = {{position: "absolute", }}/>
             <SafeAreaView style={{ flex: 1, width: "100%", height: "110%", alignItems: "center", marginTop: 60 }}>
                 <KeyboardAvoidingView behavior="padding" style={{ flex: 1, width: "100%", alignItems: "center", }}>
 
-                    <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 45, color: 'white' }}>Sign Up</Text>
+                    <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 45, color: 'black' }}>Sign Up</Text>
 
                     <View style={styles.inputSection}>
-                        <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 14, color: 'white' }}>First Name</Text>
-                        <TextInput style={styles.input} placeholder='Jane' onChangeText = {value => firstNameRef.current=value} placeholderTextColor="#9CA3AF" />
-                        <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 14, color: 'white' }}>Last Name</Text>
-                        <TextInput style={styles.input} placeholder='Doe' onChangeText = {value => lastNameRef.current=value} placeholderTextColor="#9CA3AF" />
-                        <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 14, color: 'white' }}>Email</Text>
-                        <TextInput style={styles.input} placeholder='Email' onChangeText = {value => emailRef.current=value} placeholderTextColor="#9CA3AF" />
-                        <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 14, color: 'white' }}>Password</Text>
-                        <TextInput style={styles.input}placeholder='Password' onChangeText={value=> passwordRef.current=value} placeholderTextColor="#9CA3AF" secureTextEntry={true} />
+                        <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 14, color: 'black' }}>First Name</Text>
+                        <TextInput style={styles.input} placeholder='Jane' onChangeText={value => firstNameRef.current = value} placeholderTextColor="#9CA3AF" />
+                        <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 14, color: 'black' }}>Last Name</Text>
+                        <TextInput style={styles.input} placeholder='Doe' onChangeText={value => lastNameRef.current = value} placeholderTextColor="#9CA3AF" />
+                        <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 14, color: 'black' }}>Email</Text>
+                        <TextInput style={styles.input} placeholder='Email' onChangeText={value => emailRef.current = value} placeholderTextColor="#9CA3AF" />
+                        <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 14, color: 'black' }}>Password</Text>
+                        <TextInput style={styles.input} placeholder='Password' onChangeText={value => passwordRef.current = value} placeholderTextColor="#9CA3AF" secureTextEntry={true} />
 
-                        <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 14, color: 'white' }}>Confirm Password</Text>
-                        <TextInput style={styles.input}  placeholder='Password' value={password} onChangeText={(text)=>setPassword(text)} placeholderTextColor="#9CA3AF" secureTextEntry={true} />
-                        <TouchableOpacity onPress = {handleRegister}>
+                        <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 14, color: 'black' }}>Confirm Password</Text>
+                        <TextInput style={styles.input} placeholder='Password' value={password} onChangeText={(text) => setPassword(text)} placeholderTextColor="#9CA3AF" secureTextEntry={true} />
+                        <TouchableOpacity onPress={handleRegister}>
                             <LinearGradient
                                 style={styles.buttonLogin}
-                                colors={["#004AAD", "#5271FF"]}
-                                start={{ x: 1, y: 0 }}
-                                end={{ x: 1, y: 1 }}
+                                colors={["#fff", "#000"]}
+                                start={{ x: 2, y: 0 }}
+                                end={{ x: 0, y: 1 }}
                             >
 
                                 <Text style={styles.signInText}>Sign Up</Text>
@@ -91,23 +94,20 @@ export default function SignUp() {
                             </LinearGradient>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={styles.googleLogin}>
-                            <Image style={styles.googleLogo} source={require('./../assets/google.png')} />
-                            <Text style={styles.googleSignInText}>Sign up with Google</Text>
-                        </TouchableOpacity>
-
                         <View style={styles.bottomTextContainer}>
-                        {/*ADD TEXT ON PRESS NAVIGATION*/}
-                        <Text style={{ fontFamily: "Montserrat-Italic", color: "white", }}>Already have an account? <Link to="/Login"><Text style={{ fontFamily: "Montserrat-Bold" }}>| Login</Text></Link></Text>
-                    </View>
+                            {/*ADD TEXT ON PRESS NAVIGATION*/}
+                            <TouchableOpacity onPress={handleLogin}>
+                                <Text style={{ fontFamily: "Montserrat-Italic", color: "black", }}>Already have an account? <Text style={{ fontFamily: "Montserrat-Bold" }}>| Login</Text></Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
 
-                  
+
                 </KeyboardAvoidingView>
             </SafeAreaView>
-    
-           
-        </LinearGradient>
+
+
+        </View>
 
     );
 }
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
         height: 70,
         justifyContent: 'center',
         alignContent: 'center',
-        color: 'white',
+        color: 'black',
         fontFamily: 'Montserrat-SemiBold',
         marginBottom: 15,
         shadowColor: '#ffffff',
@@ -164,10 +164,10 @@ const styles = StyleSheet.create({
         marginTop: 6,
         marginBottom: 18,
         borderWidth: 0.5,
-        borderColor: 'white',
+        borderColor: 'black',
         borderRadius: 10,
         padding: 10,
-        color: 'white',
+        color: 'black',
         fontFamily: 'Montserrat-Regular',
     },
     container: {

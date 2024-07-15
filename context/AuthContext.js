@@ -5,7 +5,7 @@ import {  onAuthStateChanged,
     sendEmailVerification } from "firebase/auth";
 import { createContext, useState, useEffect, useContext } from "react";
 import {auth, db} from "../FirebaseConfig";
-import { collection,query, doc, where, getDoc, setDoc, getDocs  } from "firebase/firestore";
+import { collection,query, doc, where, getDoc, setDoc } from "firebase/firestore";
 
 
 export const AuthContext = createContext();
@@ -100,12 +100,13 @@ export const AuthContextProvider = ({children}) => {
 
         
             await setDoc(doc(db, "users", response?.user?.uid), {
-              firstName,
-              lastName,
-              userId: response?.user?.uid,
-              emailVerified: false,
-              PIN: uniquePIN
-            });
+                firstName,
+                lastName,
+                userId: response?.user?.uid,
+                emailVerified: false,
+                PIN: uniquePIN,
+                profilePicture: null // Add this line
+              });
         
             // Send email verification
             await sendEmailVerification(response.user);

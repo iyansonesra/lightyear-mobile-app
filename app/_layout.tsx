@@ -28,28 +28,28 @@ const MainLayout = () => {
 
   useEffect(() => {
     if (isLoading) return;
-
+  
     const inApp = segments[0] === '(tabs)';
     const inAuth = segments[0] === '(auth)';
     const inEmailVerification = segments[0] === 'EmailVerification';
-
+    const inLogin = segments[0] === 'Login';
+  
     const navigate = async (route) => {
       setIsNavigating(true);
       await router.replace(route);
-      setTimeout(() => setIsNavigating(false), 500); // Delay to ensure the overlay is visible
+      setTimeout(() => setIsNavigating(false), 500);
     };
-
+  
     if (isAuthenticated && user) {
       if (!emailVerified && !inEmailVerification) {
         navigate('/EmailVerification');
       } else if (emailVerified && !inApp) {
         navigate('/(tabs)');
       }
-    } else if (!isAuthenticated && !inAuth && !inEmailVerification) {
+    } else if (!isAuthenticated && !inAuth && !inEmailVerification && !inLogin) {
       navigate('/SignUp');
     }
   }, [isAuthenticated, emailVerified, user, isLoading, segments]);
-
   if (isLoading) {
     return <LoadingOverlay />;
   }

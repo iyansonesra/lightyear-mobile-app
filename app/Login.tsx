@@ -50,11 +50,9 @@ const Login = ({ }) => {
     };
 
     return (
-        <LinearGradient
+        <View
             style={styles.container}
-            colors={["#000000", "#103565", "#5687A2"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
+         
         >
             <Image  source={require('./../assets/new-background.jpg')}  style = {{position: "absolute", }}/>
             <SafeAreaView style={{ flex: 1, width: "100%", alignItems: "center", marginTop: 100 }}>
@@ -97,7 +95,7 @@ const Login = ({ }) => {
                     </View>
                 </KeyboardAvoidingView>
             </SafeAreaView>
-        </LinearGradient>
+        </View>
 
     );
 };

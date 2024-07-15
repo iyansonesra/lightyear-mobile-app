@@ -6,10 +6,18 @@ import { View, StyleSheet, Text, useWindowDimensions, Image, TextInput, Button, 
 import Ionicons from '@expo/vector-icons/Ionicons';
 import ThemeContext from '../../context/ThemeContext';
 import Colors from '../../components/Colors';
-import { collection, query, where, getDocs, doc } from "firebase/firestore";
-import {db, usersRef} from "../../FirebaseConfig";
+import { collection, query, where, getDocs, doc, setDoc, getDoc } from "firebase/firestore";
+import { db, usersRef } from "../../FirebaseConfig";
 import { useAuth } from '../../context/AuthContext';
 import { Animated } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { ref, uploadBytes, getDownloadURL, getStorage, uploadBytesResumable, deleteObject } from "firebase/storage";
+import { storage } from "../../FirebaseConfig";
+import AnimatedPlaceholder from '../../components/AnimatedPlaceholder';
+import * as ImageManipulator from 'expo-image-manipulator';
+
+
+
 
 
 
@@ -18,30 +26,140 @@ const Profile = ({ }) => {
 
     const [displayMode, setDisplayMode] = useState('system');
     const slideAnimation = useRef(new Animated.Value(0)).current;
-    const {user} = useAuth();
+    const { user } = useAuth();
     const [name, setName] = useState<string>('');
     const [LastName, setLastName] = useState<string>('');
-    // const name = query(collection(db, "AUT0AwmWdIWXPn0e0c1U84OzZLN2"), where('userId', '==', user?.uid));
+    const [userPin, setUserPin] = useState('');
+    const [profilePicture, setProfilePicture] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
+    const ProfilePicturePlaceholder = () => (
+        <AnimatedPlaceholder width={50} height={50} style={{ borderRadius: 25 }} />
+      );
+    
+      const TextPlaceholder = ({ width }) => (
+        <AnimatedPlaceholder width={width} height={20} style={{ marginBottom: 5 }} />
+      );
+
+      const pickImage = async () => {
+        try {
+          let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 1, // Use full quality here, we'll compress later
+          });
+      
+          console.log("ImagePicker result:", result);  // Log the result for debugging
+      
+          if (!result.canceled) {
+            // The selected image URI is now directly on the result object
+            const imageUri = result.uri || result.assets?.[0]?.uri;
+            
+            if (!imageUri) {
+              throw new Error("No image URI found in the result");
+            }
+      
+            // Resize and compress the image
+            const manipulatedImage = await ImageManipulator.manipulateAsync(
+              imageUri,
+              [{ resize: { width: 500, height: 500 } }], // Resize to 500x500
+              { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG } // Compress to 70% quality
+            );
+      
+            // Get the current user data
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            const userData = userDoc.data();
+      
+            // If there's a previous image, delete it
+            if (userData && userData.profilePictureRef) {
+              const oldImageRef = ref(getStorage(), userData.profilePictureRef);
+              await deleteObject(oldImageRef).catch(error => {
+                console.log("Error deleting old image:", error);
+              });
+            }
+      
+            // Convert image to blob
+            const response = await fetch(manipulatedImage.uri);
+            const blob = await response.blob();
+      
+            // Upload new image
+            const fileRef = ref(getStorage(), `profilePictures/${user.uid}_${Date.now()}.jpg`);
+            const uploadResult = await uploadBytesResumable(fileRef, blob);
+      
+            // We're done with the blob, close and release it
+            blob.close();
+      
+            const uploadUrl = await getDownloadURL(fileRef);
+      
+            // Update user document with new image URL and reference
+            await setDoc(doc(db, "users", user.uid), { 
+              profilePicture: uploadUrl,
+              profilePictureRef: fileRef.fullPath
+            }, { merge: true });
+      
+            setProfilePicture(uploadUrl);
+          } else {
+            console.log("Image picking was canceled");
+          }
+        } catch (e) {
+          console.error("Error in pickImage: ", e);
+          if (e.message) {
+            console.error("Error message: ", e.message);
+          }
+          if (e.stack) {
+            console.error("Error stack: ", e.stack);
+          }
+          alert("An error occurred while picking or uploading the image.");
+        }
+      };
+    const uploadImageAsync = async (uri) => {
+        const blob = await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.onload = function () {
+                resolve(xhr.response);
+            };
+            xhr.onerror = function (e) {
+                reject(new TypeError('Network request failed'));
+            };
+            xhr.responseType = 'blob';
+            xhr.open('GET', uri, true);
+            xhr.send(null);
+        });
+
+        const fileRef = ref(getStorage(), `profilePictures/${Date.now()}.png`);
+        const result = await uploadBytesResumable(fileRef, blob);
+
+        // We're done with the blob, close and release it
+        blob.close();
+
+        return await getDownloadURL(fileRef);
+    }
     useEffect(() => {
-        if(user?.uid)
+        if (user?.uid)
             getUsers();
     }, []);
+
     const getUsers = async () => {
-    const name = query(usersRef, where('userId', '==', user?.uid));
+        setIsLoading(true);
+        const userQuery = query(usersRef, where('userId', '==', user?.uid));
 
-    const querySnapshort = await getDocs(name);
-    let data: { [x: string]: any; }[] = [];
-    querySnapshort.forEach(doc => {
-        data.push({...doc.data()});
-    });
+        const querySnapshot = await getDocs(userQuery);
+        let data = [];
+        querySnapshot.forEach(doc => {
+            data.push({ ...doc.data() });
+        });
 
-    setName(data[0].firstName);
-    setLastName(data[0].lastName);
-
+        if (data.length > 0) {
+            setName(data[0].firstName);
+            setLastName(data[0].lastName);
+            setUserPin(data[0].PIN);
+            setProfilePicture(data[0].profilePicture);
+        }
+        setIsLoading(false);
     }
 
-    const {logout: logoutUser} = useAuth();
+    const { logout: logoutUser } = useAuth();
 
     const handleLogoutUser = async () => {
 
@@ -235,7 +353,12 @@ const Profile = ({ }) => {
             height: 90
             ,
 
-        }
+        },
+        profileImage: {
+            width: 50,
+            height: 50,
+            borderRadius: 25,
+        },
     });
 
     const { logout } = useAuth();
@@ -249,28 +372,53 @@ const Profile = ({ }) => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.topProf}>
-                <View style={styles.profileCircle}>
-                    <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 25, color: theme == 'dark' ? Colors.light.textColor : Colors.dark.textColor, }}>S</Text>
-
-                </View>
+                <TouchableOpacity onPress={pickImage}>
+                    {isLoading ? (
+                        <ProfilePicturePlaceholder />
+                    ) : profilePicture ? (
+                        <Image
+                            source={{ uri: profilePicture }}
+                            style={styles.profileImage}
+                        />
+                    ) : (
+                        <View style={styles.profileCircle}>
+                            <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 25, color: theme == 'dark' ? Colors.light.textColor : Colors.dark.textColor, }}>
+                                {name ? name[0].toUpperCase() : 'U'}
+                            </Text>
+                        </View>
+                    )}
+                </TouchableOpacity>
                 <View style={styles.vertText}>
-                    <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 25, color: theme == 'light' ? Colors.light.textColor : Colors.dark.textColor, marginLeft: "10%", }}>Iyan Sonesra</Text>
-
-                    <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 13, color: 'grey', marginLeft: "10%", marginTop: 2 }}>iyansonesra@gmail.com</Text>
-
+                    {isLoading ? (
+                        <>
+                            <TextPlaceholder width={150} />
+                            <TextPlaceholder width={200} />
+                        </>
+                    ) : (
+                        <>
+                            <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 25, color: theme == 'light' ? Colors.light.textColor : Colors.dark.textColor, marginLeft: "10%", }}>{name + " " + LastName}</Text>
+                            <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 13, color: 'grey', marginLeft: "10%", marginTop: 2 }}>iyansonesra@gmail.com</Text>
+                        </>
+                    )}
                 </View>
                 <Ionicons name="ellipsis-horizontal" size={20} color={theme == 'light' ? Colors.light.textColor : Colors.dark.textColor} />
-
             </View>
 
             <View style={styles.settingsOptions}>
                 {/* <View style={styles.divider}></View> */}
 
                 <View style={styles.pinSection}>
-                    <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 20, color: theme == 'light' ? Colors.light.textColor : Colors.dark.textColor, marginLeft: "7%",  marginTop: 10, }}>Your Pin</Text>
+                    <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 20, color: theme == 'light' ? Colors.light.textColor : Colors.dark.textColor, marginLeft: "7%", marginTop: 10, }}>Your Pin</Text>
 
-                    <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 25, color: theme == 'light' ? Colors.light.textColor : Colors.dark.textColor, marginLeft: "7%", marginBottom: 0, marginTop: 10,  }}>0000-0001</Text>
-
+                    {isLoading ? (
+                        <View style={{ marginLeft: "7%", marginTop: 10, }}>
+                            <TextPlaceholder width={100} />
+                        </View>
+                    ) : (
+                        <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 25, color: theme == 'light' ? Colors.light.textColor : Colors.dark.textColor, marginLeft: "7%", marginBottom: 0, marginTop: 10, }}>
+                            {userPin ? userPin.slice(0, 4) + '-' + userPin.slice(4) : 'Loading...'}
+                        </Text>
+                    )}
                 </View>
                 <View style={styles.divider}></View>
 
@@ -283,19 +431,15 @@ const Profile = ({ }) => {
 
 
                 <View style={styles.portfolioDetails}>
-                    {/* <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 20, color: theme == 'light' ? Colors.light.textColor : Colors.dark.textColor, marginLeft: "7%", marginBottom: 10, marginTop: 10 }}>Financial Portfolio</Text> */}
-                    <TouchableOpacity style={styles.optionsComp} onPress = {handleLogout}>
-                    <View style={styles.profText}>
-                        {/* <View style={styles.iconBackgroundLogOut}>
-                            <Ionicons name="log-out-outline" size={35} color="black" />
-                        </View> */}
-                        <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 20, color: "#FF5555", marginLeft: "3%", marginTop: "1%" }}>Logout</Text>
-                    </View>
-                    <Ionicons name="log-out-outline" size={30} color="#FF5555" />
-                                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.optionsComp} onPress={handleLogout}>
+                        <View style={styles.profText}>
+
+                            <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 20, color: "#FF5555", marginLeft: "3%", marginTop: "1%" }}>Logout</Text>
+                        </View>
+                        <Ionicons name="log-out-outline" size={30} color="#FF5555" />
+                    </TouchableOpacity>
                 </View>
 
-                {/* <View style={styles.divider}></View> */}
             </View>
         </SafeAreaView>
     );
